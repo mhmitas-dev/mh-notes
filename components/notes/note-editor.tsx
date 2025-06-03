@@ -1,12 +1,14 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { AutoResizeTextarea } from "@/components/ui/auto-resize-textarea"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { validateNoteContent } from "@/lib/utils/validation"
+import { PenTool, Save } from "lucide-react"
 import type { Context, User } from "@/lib/types"
 
 interface NoteEditorProps {
@@ -44,8 +46,15 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
   const canSave = validateNoteContent(content) && !isDisabled
 
   return (
-    <div className="p-4 border-b border-[#1e3a47]">
-      <div className="space-y-3">
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <PenTool className="w-5 h-5" />
+          {activeContext ? `Writing in ${activeContext.name}` : "Select a context"}
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
         <AutoResizeTextarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
@@ -56,16 +65,22 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
           minHeight={120}
           maxHeight={500}
           disabled={isDisabled}
-          className="text-sm leading-relaxed"
+          className="text-sm leading-relaxed custom-scrollbar"
         />
 
         <div className="flex justify-between items-center">
-          <div className="text-xs text-[#64748b]">
+          <div className="flex items-center gap-2">
             {content.length > 0 && (
-              <span>
-                {content.length} characters
-                {content.length > 1000 && <span className="ml-2 text-[#f59e0b]">• Long note</span>}
-              </span>
+              <>
+                <Badge variant="secondary" className="text-xs">
+                  {content.length} characters
+                </Badge>
+                {content.length > 1000 && (
+                  <Badge variant="outline" className="text-xs text-amber-600">
+                    Long note
+                  </Badge>
+                )}
+              </>
             )}
           </div>
 
@@ -76,11 +91,14 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
                 Saving...
               </>
             ) : (
-              "Save Note"
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Save Note
+              </>
             )}
           </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

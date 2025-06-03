@@ -1,13 +1,15 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { AutoResizeTextarea } from "@/components/ui/auto-resize-textarea"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { formatDate, isEdited } from "@/lib/utils/date"
 import { validateNoteContent } from "@/lib/utils/validation"
+import { Edit, Trash2, Save, X } from "lucide-react"
 import type { Note } from "@/lib/types"
 
 interface NoteItemProps {
@@ -68,10 +70,10 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
   const hasChanges = editContent.trim() !== note.content.trim()
 
   return (
-    <div className="bg-[#0c1c25] rounded-lg border border-[#1e3a47] overflow-hidden transition-all duration-200 hover:border-[#2d4a59]">
-      {isEditing ? (
-        <div className="p-4">
-          <div className="space-y-3">
+    <Card className="note-item-enter transition-all duration-200 hover:shadow-md">
+      <CardContent className="p-4">
+        {isEditing ? (
+          <div className="space-y-4">
             <AutoResizeTextarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
@@ -80,29 +82,36 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
               minHeight={100}
               maxHeight={400}
               disabled={saving}
-              className="text-sm leading-relaxed"
+              className="text-sm leading-relaxed custom-scrollbar"
               autoFocus
             />
 
             <div className="flex justify-between items-center">
-              <div className="text-xs text-[#64748b]">
+              <div className="flex items-center gap-2">
                 {editContent.length > 0 && (
-                  <span>
-                    {editContent.length} characters
-                    {hasChanges && <span className="ml-2 text-[#38bdf8]">• Modified</span>}
-                  </span>
+                  <>
+                    <Badge variant="secondary" className="text-xs">
+                      {editContent.length} characters
+                    </Badge>
+                    {hasChanges && (
+                      <Badge variant="outline" className="text-xs text-primary">
+                        Modified
+                      </Badge>
+                    )}
+                  </>
                 )}
               </div>
 
               <div className="flex gap-2">
                 <Button onClick={handleCancelEdit} variant="outline" size="sm" disabled={saving}>
+                  <X className="w-3 h-3 mr-1" />
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSaveEdit}
                   size="sm"
                   disabled={!canSave}
-                  className={hasChanges ? "bg-[#38bdf8] hover:bg-[#0ea5e9]" : ""}
+                  className={hasChanges ? "bg-primary hover:bg-primary/90" : ""}
                 >
                   {saving ? (
                     <>
@@ -110,45 +119,62 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
                       Saving...
                     </>
                   ) : (
-                    "Save"
+                    <>
+                      <Save className="w-3 h-3 mr-1" />
+                      Save
+                    </>
                   )}
                 </Button>
               </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="p-4 group">
-          <div className="whitespace-pre-wrap text-[#f8fafc] text-sm leading-relaxed mb-3">{note.content}</div>
+        ) : (
+          <div className="group">
+            <div className="whitespace-pre-wrap text-foreground text-sm leading-relaxed mb-4">{note.content}</div>
 
-          <div className="flex justify-between items-center pt-3 border-t border-[#1e3a47]">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-[#64748b]">
-                {formatDate(note.created_at)}
-                {isEdited(note.created_at, note.updated_at) && <span className="ml-2 text-[#94a3b8]">(edited)</span>}
-              </span>
-              <span className="text-xs text-[#64748b]">{note.content.length} characters</span>
-            </div>
+            <div className="flex justify-between items-center pt-3 border-t border-border">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    {formatDate(note.created_at)}
+                  </Badge>
+                  {isEdited(note.created_at, note.updated_at) && (
+                    <Badge variant="secondary" className="text-xs">
+                      Edited
+                    </Badge>
+                  )}
+                </div>
+                <Badge variant="outline" className="text-xs w-fit">
+                  {note.content.length} characters
+                </Badge>
+              </div>
 
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <button
-                onClick={handleStartEdit}
-                disabled={saving}
-                className="text-[#38bdf8] hover:text-[#0ea5e9] text-xs font-medium transition-colors disabled:opacity-50 px-2 py-1 rounded hover:bg-[#1e3a47]"
-              >
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={saving}
-                className="text-[#ef4444] hover:text-[#dc2626] text-xs font-medium transition-colors disabled:opacity-50 px-2 py-1 rounded hover:bg-[#1e3a47]"
-              >
-                Delete
-              </button>
+              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <Button
+                  onClick={handleStartEdit}
+                  disabled={saving}
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  <Edit className="w-3 h-3 mr-1" />
+                  Edit
+                </Button>
+                <Button
+                  onClick={handleDelete}
+                  disabled={saving}
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Delete
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

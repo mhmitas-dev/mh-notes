@@ -1,13 +1,15 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
-import { Plus, X } from "lucide-react"
+import { Plus, X, FolderOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { validateContextName } from "@/lib/utils/validation"
+import { cn } from "@/lib/utils"
 import type { Context, User } from "@/lib/types"
 
 interface SidebarProps {
@@ -60,34 +62,43 @@ export function Sidebar({
 
   return (
     <div className="w-full md:w-64 flex-shrink-0">
-      <div className="bg-[#112733] rounded-lg border border-[#1e3a47] shadow-md overflow-hidden">
-        <div className="p-4 border-b border-[#1e3a47]">
-          <h2 className="text-lg font-medium text-[#f8fafc]">Contexts</h2>
-        </div>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <FolderOpen className="w-5 h-5" />
+            Contexts
+            <Badge variant="secondary" className="ml-auto">
+              {contexts.length}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
 
-        <div className="p-2">
+        <CardContent className="space-y-2">
           <div className="space-y-1">
             {contexts.map((context) => (
               <div key={context.id} className="relative group">
-                <button
+                <Button
                   onClick={() => onContextSelect(context.id)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeContextId === context.id
-                      ? "bg-[#1e3a47] text-[#38bdf8]"
-                      : "text-[#cbd5e1] hover:bg-[#1e3a47] hover:text-[#f8fafc]"
-                  }`}
+                  variant={activeContextId === context.id ? "secondary" : "ghost"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    activeContextId === context.id && "bg-secondary text-secondary-foreground",
+                  )}
+                  size="sm"
                 >
-                  {context.name}
-                </button>
+                  <span className="truncate">{context.name}</span>
+                </Button>
 
                 {contexts.length > 1 && (
-                  <button
+                  <Button
                     onClick={() => onContextRemove(context.id)}
                     disabled={saving}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-[#94a3b8] hover:text-[#ef4444] hover:bg-[#1e3a47] opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
                   >
-                    <X className="w-4 h-4" />
-                  </button>
+                    <X className="w-3 h-3" />
+                  </Button>
                 )}
               </div>
             ))}
@@ -95,42 +106,44 @@ export function Sidebar({
 
           {/* Add new context */}
           {showNewContextInput ? (
-            <div className="mt-2 p-2">
+            <div className="space-y-2 pt-2 border-t border-border">
               <Input
                 value={newContextName}
                 onChange={(e) => setNewContextName(e.target.value)}
                 placeholder="Context name"
-                className="text-sm mb-2"
                 onKeyDown={handleKeyDown}
                 autoFocus
                 disabled={saving}
+                className="h-8"
               />
               <div className="flex gap-2">
                 <Button
                   onClick={handleAddContext}
                   size="sm"
-                  className="w-full"
+                  className="flex-1"
                   disabled={!validateContextName(newContextName) || saving}
                 >
                   {saving ? <LoadingSpinner size="sm" /> : "Add"}
                 </Button>
-                <Button onClick={handleCancel} size="sm" variant="outline" className="w-full" disabled={saving}>
+                <Button onClick={handleCancel} size="sm" variant="outline" className="flex-1" disabled={saving}>
                   Cancel
                 </Button>
               </div>
             </div>
           ) : (
-            <button
+            <Button
               onClick={() => setShowNewContextInput(true)}
               disabled={saving}
-              className="mt-2 w-full flex items-center justify-center gap-1 px-3 py-2 rounded-md text-sm font-medium text-[#38bdf8] hover:bg-[#1e3a47] transition-colors disabled:opacity-50"
+              variant="outline"
+              size="sm"
+              className="w-full mt-2 border-dashed"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 mr-2" />
               Add Context
-            </button>
+            </Button>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

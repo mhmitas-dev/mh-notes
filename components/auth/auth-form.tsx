@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -75,11 +74,11 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
   const isFormValid = validateEmail(formData.email) && validatePassword(formData.password)
 
   return (
-    <div className="min-h-screen bg-[#001e2b] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-[#1e3a47] bg-[#112733] shadow-lg">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-3xl font-bold text-[#38bdf8] mb-2">{APP_CONFIG.name}</CardTitle>
-          <CardDescription className="text-[#94a3b8]">
+          <CardTitle className="text-3xl font-bold text-primary mb-2">{APP_CONFIG.name}</CardTitle>
+          <CardDescription>
             {isSignUp ? "Create an account to start taking notes" : "Sign in to access your notes"}
           </CardDescription>
         </CardHeader>
@@ -93,7 +92,6 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
               onChange={handleInputChange("email")}
               required
               disabled={loading}
-              className="bg-[#0c1c25]"
             />
             <Input
               type="password"
@@ -103,7 +101,6 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
               required
               disabled={loading}
               minLength={6}
-              className="bg-[#0c1c25]"
             />
             <Button type="submit" className="w-full" disabled={!isFormValid || loading}>
               {loading ? (
@@ -119,24 +116,19 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full bg-[#1e3a47]" />
+              <Separator className="w-full" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-[#112733] px-2 text-[#64748b]">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
 
-          <Button
-            onClick={handleGoogleSignIn}
-            variant="outline"
-            className="w-full border-[#1e3a47]"
-            disabled={googleLoading}
-          >
+          <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={googleLoading}>
             {googleLoading ? <LoadingSpinner size="sm" className="mr-2" /> : <GoogleIcon className="w-5 h-5 mr-2" />}
             Sign in with Google
           </Button>
 
-          {message && <p className="text-[#10b981] text-sm mt-4 text-center">{message}</p>}
+          {message && <p className="text-green-600 text-sm mt-4 text-center">{message}</p>}
           {error && <ErrorMessage message={error} className="mt-4 justify-center" />}
         </CardContent>
 
@@ -144,7 +136,7 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-[#38bdf8] hover:text-[#0ea5e9] text-sm underline"
+            className="text-primary hover:text-primary/80 text-sm underline transition-colors"
             disabled={loading || googleLoading}
           >
             {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}

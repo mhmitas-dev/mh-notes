@@ -9,8 +9,8 @@ interface ErrorMessageProps {
 
 export function ErrorMessage({ message, className, variant = "destructive" }: ErrorMessageProps) {
   const variantClasses = {
-    default: "text-[#94a3b8]",
-    destructive: "text-[#ef4444]",
+    default: "text-muted-foreground",
+    destructive: "text-destructive",
   }
 
   return (

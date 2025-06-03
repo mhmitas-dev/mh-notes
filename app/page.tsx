@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AuthForm } from "@/components/auth/auth-form"
 import { Header } from "@/components/layout/header"
 import { Sidebar } from "@/components/layout/sidebar"
@@ -32,11 +32,11 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Set active context when contexts load
-  useState(() => {
+  useEffect(() => {
     if (contexts.length > 0 && !activeContextId) {
       setActiveContextId(contexts[0].id)
     }
-  })
+  }, [contexts, activeContextId])
 
   const activeContext = contexts.find((c) => c.id === activeContextId)
   const contextNotes = activeContextId ? getNotesForContext(activeContextId) : []
@@ -111,10 +111,10 @@ export default function HomePage() {
   // Loading state
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#001e2b] flex items-center justify-center">
-        <div className="flex items-center gap-2 text-[#38bdf8]">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-3 text-primary">
           <LoadingSpinner size="lg" />
-          <span className="text-lg">Loading...</span>
+          <span className="text-lg font-medium">Loading...</span>
         </div>
       </div>
     )
@@ -134,10 +134,10 @@ export default function HomePage() {
   // Notes loading state
   if (notesLoading) {
     return (
-      <div className="min-h-screen bg-[#001e2b] flex items-center justify-center">
-        <div className="flex items-center gap-2 text-[#38bdf8]">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-3 text-primary">
           <LoadingSpinner size="lg" />
-          <span className="text-lg">Loading your notes...</span>
+          <span className="text-lg font-medium">Loading your notes...</span>
         </div>
       </div>
     )
@@ -145,7 +145,7 @@ export default function HomePage() {
 
   // Main application
   return (
-    <div className="min-h-screen bg-[#001e2b] text-[#f8fafc]">
+    <div className="min-h-screen bg-background">
       <Header
         user={user}
         error={error}
@@ -156,7 +156,7 @@ export default function HomePage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           <Sidebar
             contexts={contexts}
             activeContextId={activeContextId}
@@ -167,26 +167,16 @@ export default function HomePage() {
             onContextRemove={handleRemoveContext}
           />
 
-          <div className="flex-1">
-            <div className="bg-[#112733] rounded-lg border border-[#1e3a47] shadow-md overflow-hidden">
-              <div className="p-4 border-b border-[#1e3a47]">
-                <h2 className="text-lg font-medium text-[#f8fafc]">
-                  {activeContext ? activeContext.name : "Select a context"}
-                </h2>
-              </div>
+          <div className="flex-1 space-y-6">
+            <NoteEditor activeContext={activeContext} user={user} saving={saving} onSave={handleSaveNote} />
 
-              <NoteEditor activeContext={activeContext} user={user} saving={saving} onSave={handleSaveNote} />
-
-              <div className="p-4">
-                <NotesList
-                  notes={contextNotes}
-                  activeContext={activeContext}
-                  saving={saving}
-                  onEditNote={handleEditNote}
-                  onDeleteNote={handleDeleteNote}
-                />
-              </div>
-            </div>
+            <NotesList
+              notes={contextNotes}
+              activeContext={activeContext}
+              saving={saving}
+              onEditNote={handleEditNote}
+              onDeleteNote={handleDeleteNote}
+            />
           </div>
         </div>
       </div>
