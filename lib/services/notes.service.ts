@@ -1,0 +1,74 @@
+import { supabase } from "@/lib/supabase"
+import type { Context, Note, CreateContextData, CreateNoteData, UpdateNoteData } from "@/lib/types"
+import { DEFAULT_CONTEXTS } from "@/lib/constants"
+
+export class NotesService {
+  static async getContexts(): Promise<{ data: Context[] | null; error: any }> {
+    const { data, error } = await supabase.from("contexts").select("*").order("created_at", { ascending: true })
+
+    return { data, error }
+  }
+
+  static async createContext({ name, userId }: CreateContextData): Promise<{ data: Context | null; error: any }> {
+    const { data, error } = await supabase
+      .from("contexts")
+      .insert([{ name, user_id: userId }])
+      .select()
+      .single()
+
+    return { data, error }
+  }
+
+  static async deleteContext(contextId: string): Promise<{ error: any }> {
+    const { error } = await supabase.from("contexts").delete().eq("id", contextId)
+
+    return { error }
+  }
+
+  static async createDefaultContexts(userId: string): Promise<{ data: Context[] | null; error: any }> {
+    const { data, error } = await supabase
+      .from("contexts")
+      .insert(
+        DEFAULT_CONTEXTS.map((name) => ({
+          name,
+          user_id: userId,
+        })),
+      )
+      .select()
+
+    return { data, error }
+  }
+
+  static async getNotes(): Promise<{ data: Note[] | null; error: any }> {
+    const { data, error } = await supabase.from("notes").select("*").order("created_at", { ascending: false })
+
+    return { data, error }
+  }
+
+  static async createNote({ contextId, content, userId }: CreateNoteData): Promise<{ data: Note | null; error: any }> {
+    const { data, error } = await supabase
+      .from("notes")
+      .insert([{ context_id: contextId, content, user_id: userId }])
+      .select()
+      .single()
+
+    return { data, error }
+  }
+
+  static async updateNote({ noteId, content }: UpdateNoteData): Promise<{ data: Note | null; error: any }> {
+    const { data, error } = await supabase
+      .from("notes")
+      .update({ content, updated_at: new Date().toISOString() })
+      .eq("id", noteId)
+      .select()
+      .single()
+
+    return { data, error }
+  }
+
+  static async deleteNote(noteId: string): Promise<{ error: any }> {
+    const { error } = await supabase.from("notes").delete().eq("id", noteId)
+
+    return { error }
+  }
+}

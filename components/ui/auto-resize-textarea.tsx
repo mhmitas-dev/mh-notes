@@ -1,0 +1,45 @@
+"use client"
+
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea"
+
+export interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  minHeight?: number
+  maxHeight?: number
+  enableSmoothing?: boolean
+}
+
+const AutoResizeTextarea = React.forwardRef<HTMLTextAreaElement, AutoResizeTextareaProps>(
+  ({ className, value = "", minHeight = 120, maxHeight = 400, enableSmoothing = true, ...props }, ref) => {
+    const { textareaRef } = useAutoResizeTextarea(String(value), {
+      minHeight,
+      maxHeight,
+      padding: 16,
+    })
+
+    // Merge refs
+    React.useImperativeHandle(ref, () => textareaRef.current!, [])
+
+    return (
+      <textarea
+        ref={textareaRef}
+        value={value}
+        className={cn(
+          "flex w-full rounded-md border border-[#1e3a47] bg-[#0c1c25] px-3 py-2 text-sm text-[#f8fafc] ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[#64748b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          enableSmoothing && "transition-[height] duration-150 ease-out",
+          className,
+        )}
+        style={{
+          resize: "none",
+          minHeight: `${minHeight}px`,
+          maxHeight: `${maxHeight}px`,
+        }}
+        {...props}
+      />
+    )
+  },
+)
+AutoResizeTextarea.displayName = "AutoResizeTextarea"
+
+export { AutoResizeTextarea }

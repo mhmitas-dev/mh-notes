@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import type { User } from "@supabase/supabase-js"
+import { AuthService } from "@/lib/services/auth.service"
+import type { User, AuthFormData } from "@/lib/types"
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -10,7 +11,7 @@ export function useAuth() {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    AuthService.getSession().then(({ session }) => {
       setUser(session?.user ?? null)
       setLoading(false)
     })
@@ -26,35 +27,20 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    return { data, error }
+  const signUp = async (formData: AuthFormData) => {
+    return AuthService.signUp(formData)
   }
 
-  const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { data, error }
+  const signIn = async (formData: AuthFormData) => {
+    return AuthService.signIn(formData)
   }
 
   const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    return { data, error }
+    return AuthService.signInWithGoogle()
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    return { error }
+    return AuthService.signOut()
   }
 
   return {

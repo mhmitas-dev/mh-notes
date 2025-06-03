@@ -1,162 +1,171 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, type Context, type Note } from "@/lib/supabase"
-import { createDefaultContexts } from "./create-default-contexts"
+import { NotesService } from "@/lib/services/notes.service"
+import { AuthService } from "@/lib/services/auth.service"
+import type { Note, NotesState, CreateContextData, CreateNoteData, UpdateNoteData } from "@/lib/types"
 
 export function useNotes() {
-  const [contexts, setContexts] = useState<Context[]>([])
-  const [notes, setNotes] = useState<Note[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [state, setState] = useState<NotesState>({
+    contexts: [],
+    notes: [],
+    loading: true,
+    error: null,
+  })
 
-  // Load contexts and notes on mount
   useEffect(() => {
     loadData()
   }, [])
 
   const loadData = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      setState((prev) => ({ ...prev, loading: true, error: null }))
 
       // Load contexts
-      const { data: contextsData, error: contextsError } = await supabase
-        .from("contexts")
-        .select("*")
-        .order("created_at", { ascending: true })
+      const { data: contextsData, error: contextsError } = await NotesService.getContexts()
 
       if (contextsError) throw contextsError
 
-      // If no contexts exist and we have a user, create default ones
-      if (!contextsData || contextsData.length === 0) {
-        // We'll need to get the current user
-        const {
-          data: { user },
-        } = await supabase.auth.getUser()
+      let contexts = contextsData || []
+
+      // Create default contexts if none exist
+      if (contexts.length === 0) {
+        const { user } = await AuthService.getCurrentUser()
         if (user) {
-          const defaultContexts = await createDefaultContexts(user.id)
-          setContexts(defaultContexts || [])
+          const { data: defaultContexts } = await NotesService.createDefaultContexts(user.id)
+          contexts = defaultContexts || []
         }
-      } else {
-        setContexts(contextsData || [])
       }
 
       // Load notes
-      const { data: notesData, error: notesError } = await supabase
-        .from("notes")
-        .select("*")
-        .order("created_at", { ascending: false })
+      const { data: notesData, error: notesError } = await NotesService.getNotes()
 
       if (notesError) throw notesError
 
-      setNotes(notesData || [])
+      setState((prev) => ({
+        ...prev,
+        contexts,
+        notes: notesData || [],
+        loading: false,
+      }))
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
-    } finally {
-      setLoading(false)
+      setState((prev) => ({
+        ...prev,
+        error: err instanceof Error ? err.message : "An error occurred",
+        loading: false,
+      }))
     }
   }
 
-  // Add user parameter to all database operations
-  const addContext = async (name: string, userId: string) => {
+  const addContext = async (data: CreateContextData) => {
     try {
-      const { data, error } = await supabase
-        .from("contexts")
-        .insert([{ name, user_id: userId }])
-        .select()
-        .single()
+      const { data: newContext, error } = await NotesService.createContext(data)
 
       if (error) throw error
 
-      setContexts((prev) => [...prev, data])
-      return data
+      setState((prev) => ({
+        ...prev,
+        contexts: [...prev.contexts, newContext!],
+      }))
+
+      return newContext!
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add context")
+      const errorMessage = err instanceof Error ? err.message : "Failed to add context"
+      setState((prev) => ({ ...prev, error: errorMessage }))
       throw err
     }
   }
 
   const removeContext = async (contextId: string) => {
     try {
-      const { error } = await supabase.from("contexts").delete().eq("id", contextId)
+      const { error } = await NotesService.deleteContext(contextId)
 
       if (error) throw error
 
-      setContexts((prev) => prev.filter((c) => c.id !== contextId))
-      setNotes((prev) => prev.filter((n) => n.context_id !== contextId))
+      setState((prev) => ({
+        ...prev,
+        contexts: prev.contexts.filter((c) => c.id !== contextId),
+        notes: prev.notes.filter((n) => n.context_id !== contextId),
+      }))
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove context")
+      const errorMessage = err instanceof Error ? err.message : "Failed to remove context"
+      setState((prev) => ({ ...prev, error: errorMessage }))
       throw err
     }
   }
 
-  const addNote = async (contextId: string, content: string, userId: string) => {
+  const addNote = async (data: CreateNoteData) => {
     try {
-      const { data, error } = await supabase
-        .from("notes")
-        .insert([{ context_id: contextId, content, user_id: userId }])
-        .select()
-        .single()
+      const { data: newNote, error } = await NotesService.createNote(data)
 
       if (error) throw error
 
-      setNotes((prev) => [data, ...prev])
-      return data
+      setState((prev) => ({
+        ...prev,
+        notes: [newNote!, ...prev.notes],
+      }))
+
+      return newNote!
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add note")
+      const errorMessage = err instanceof Error ? err.message : "Failed to add note"
+      setState((prev) => ({ ...prev, error: errorMessage }))
       throw err
     }
   }
 
-  const updateNote = async (noteId: string, content: string) => {
+  const updateNote = async (data: UpdateNoteData) => {
     try {
-      const { data, error } = await supabase
-        .from("notes")
-        .update({ content, updated_at: new Date().toISOString() })
-        .eq("id", noteId)
-        .select()
-        .single()
+      const { data: updatedNote, error } = await NotesService.updateNote(data)
 
       if (error) throw error
 
-      setNotes((prev) => prev.map((note) => (note.id === noteId ? data : note)))
-      return data
+      setState((prev) => ({
+        ...prev,
+        notes: prev.notes.map((note) => (note.id === data.noteId ? updatedNote! : note)),
+      }))
+
+      return updatedNote!
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update note")
+      const errorMessage = err instanceof Error ? err.message : "Failed to update note"
+      setState((prev) => ({ ...prev, error: errorMessage }))
       throw err
     }
   }
 
   const deleteNote = async (noteId: string) => {
     try {
-      const { error } = await supabase.from("notes").delete().eq("id", noteId)
+      const { error } = await NotesService.deleteNote(noteId)
 
       if (error) throw error
 
-      setNotes((prev) => prev.filter((n) => n.id !== noteId))
+      setState((prev) => ({
+        ...prev,
+        notes: prev.notes.filter((n) => n.id !== noteId),
+      }))
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete note")
+      const errorMessage = err instanceof Error ? err.message : "Failed to delete note"
+      setState((prev) => ({ ...prev, error: errorMessage }))
       throw err
     }
   }
 
-  const getNotesForContext = (contextId: string) => {
-    return notes.filter((note) => note.context_id === contextId)
+  const getNotesForContext = (contextId: string): Note[] => {
+    return state.notes.filter((note) => note.context_id === contextId)
   }
 
-  // Update the return object to include userId parameter
+  const clearError = () => {
+    setState((prev) => ({ ...prev, error: null }))
+  }
+
   return {
-    contexts,
-    notes,
-    loading,
-    error,
-    addContext: (name: string, userId: string) => addContext(name, userId),
+    ...state,
+    addContext,
     removeContext,
-    addNote: (contextId: string, content: string, userId: string) => addNote(contextId, content, userId),
+    addNote,
     updateNote,
     deleteNote,
     getNotesForContext,
     refreshData: loadData,
+    clearError,
   }
 }
