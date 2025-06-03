@@ -17,6 +17,16 @@ export class NotesService {
     return { data, error }
   }
 
+  static async updateContext(contextId: string, name: string): Promise<{ data: Context | null; error: any }> {
+    const { data, error } = await supabase
+      .from("contexts")
+      .update({ name, updated_at: new Date().toISOString() })
+      .eq("id", contextId)
+      .select()
+      .single()
+    return { data, error }
+  }
+
   static async deleteContext(contextId: string): Promise<{ error: any }> {
     const { error } = await supabase.from("contexts").delete().eq("id", contextId)
     return { error }
@@ -40,19 +50,24 @@ export class NotesService {
     return { data, error }
   }
 
-  static async createNote({ contextId, content, userId }: CreateNoteData): Promise<{ data: Note | null; error: any }> {
+  static async createNote({
+    contextId,
+    title,
+    content,
+    userId,
+  }: CreateNoteData): Promise<{ data: Note | null; error: any }> {
     const { data, error } = await supabase
       .from("notes")
-      .insert([{ context_id: contextId, content, user_id: userId }])
+      .insert([{ context_id: contextId, title, content, user_id: userId }])
       .select()
       .single()
     return { data, error }
   }
 
-  static async updateNote({ noteId, content }: UpdateNoteData): Promise<{ data: Note | null; error: any }> {
+  static async updateNote({ noteId, title, content }: UpdateNoteData): Promise<{ data: Note | null; error: any }> {
     const { data, error } = await supabase
       .from("notes")
-      .update({ content, updated_at: new Date().toISOString() })
+      .update({ title, content, updated_at: new Date().toISOString() })
       .eq("id", noteId)
       .select()
       .single()

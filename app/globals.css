@@ -60,7 +60,7 @@
 
 /* Custom scrollbar styling using shadcn/ui colors */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -89,4 +89,138 @@
 
 .note-item-enter {
   animation: slideIn 0.3s ease-out;
+}
+
+/* Responsive text sizing */
+@media (max-width: 640px) {
+  .text-responsive {
+    @apply text-sm;
+  }
+}
+
+@media (min-width: 641px) {
+  .text-responsive {
+    @apply text-base;
+  }
+}
+
+/* Compact spacing utilities */
+.space-compact > * + * {
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .space-compact > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+/* Touch-friendly button sizing and mobile optimizations */
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Ensure proper mobile interactions */
+  @media (max-width: 1024px) {
+    .btn-touch {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Fix for iOS Safari viewport issues */
+    .mobile-safe-area {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Prevent zoom on input focus */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Mobile bottom sheet animations */
+  @keyframes slide-in-from-bottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-in {
+    animation-fill-mode: both;
+  }
+
+  .slide-in-from-bottom-0 {
+    animation-name: slide-in-from-bottom;
+  }
+
+  .fade-in-0 {
+    animation-name: fade-in;
+  }
+
+  .duration-200 {
+    animation-duration: 200ms;
+  }
+
+  .duration-300 {
+    animation-duration: 300ms;
+  }
+}
+
+/* Improve mobile scrolling */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Fix for mobile viewport height issues */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Ensure proper z-index stacking */
+.z-40 {
+  z-index: 40;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+  /* Prevent body scroll when modal is open */
+  body.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+
+  /* Fix for mobile keyboard issues */
+  .mobile-input-fix {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
 }

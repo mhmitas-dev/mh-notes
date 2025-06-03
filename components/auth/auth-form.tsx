@@ -74,17 +74,17 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
   const isFormValid = validateEmail(formData.email) && validatePassword(formData.password)
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center pb-2">
-          <CardTitle className="text-3xl font-bold text-primary mb-2">{APP_CONFIG.name}</CardTitle>
-          <CardDescription>
+    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4">
+      <Card className="w-full max-w-md shadow-lg mx-auto">
+        <CardHeader className="text-center pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-primary mb-1 sm:mb-2">{APP_CONFIG.name}</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             {isSignUp ? "Create an account to start taking notes" : "Sign in to access your notes"}
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <Input
               type="email"
               placeholder="Email"
@@ -92,6 +92,7 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
               onChange={handleInputChange("email")}
               required
               disabled={loading}
+              className="h-10 sm:h-11 text-sm sm:text-base"
             />
             <Input
               type="password"
@@ -101,8 +102,13 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
               required
               disabled={loading}
               minLength={6}
+              className="h-10 sm:h-11 text-sm sm:text-base"
             />
-            <Button type="submit" className="w-full" disabled={!isFormValid || loading}>
+            <Button
+              type="submit"
+              className="w-full h-10 sm:h-11 text-sm sm:text-base"
+              disabled={!isFormValid || loading}
+            >
               {loading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
@@ -114,7 +120,7 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
             </Button>
           </form>
 
-          <div className="relative my-6">
+          <div className="relative my-4 sm:my-6">
             <div className="absolute inset-0 flex items-center">
               <Separator className="w-full" />
             </div>
@@ -123,16 +129,25 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
             </div>
           </div>
 
-          <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={googleLoading}>
-            {googleLoading ? <LoadingSpinner size="sm" className="mr-2" /> : <GoogleIcon className="w-5 h-5 mr-2" />}
+          <Button
+            onClick={handleGoogleSignIn}
+            variant="outline"
+            className="w-full h-10 sm:h-11 text-sm sm:text-base"
+            disabled={googleLoading}
+          >
+            {googleLoading ? (
+              <LoadingSpinner size="sm" className="mr-2" />
+            ) : (
+              <GoogleIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            )}
             Sign in with Google
           </Button>
 
-          {message && <p className="text-green-600 text-sm mt-4 text-center">{message}</p>}
-          {error && <ErrorMessage message={error} className="mt-4 justify-center" />}
+          {message && <p className="text-green-600 text-sm mt-3 sm:mt-4 text-center">{message}</p>}
+          {error && <ErrorMessage message={error} className="mt-3 sm:mt-4 justify-center" />}
         </CardContent>
 
-        <CardFooter className="flex justify-center pb-6">
+        <CardFooter className="flex justify-center pb-4 sm:pb-6 px-4 sm:px-6">
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}

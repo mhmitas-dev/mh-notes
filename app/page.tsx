@@ -4,11 +4,14 @@ import { useState, useEffect } from "react"
 import { AuthForm } from "@/components/auth/auth-form"
 import { Header } from "@/components/layout/header"
 import { Sidebar } from "@/components/layout/sidebar"
+import { MobileContextSelector } from "@/components/layout/mobile-context-selector"
+import { DebugInfo } from "@/components/layout/debug-info"
 import { NoteEditor } from "@/components/notes/note-editor"
 import { NotesList } from "@/components/notes/notes-list"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { useAuth } from "@/hooks/use-auth"
 import { useNotes } from "@/hooks/use-notes"
+import { useMobile } from "@/hooks/use-mobile"
 
 export default function HomePage() {
   const { user, loading: authLoading, signUp, signIn, signInWithGoogle, signOut } = useAuth()
@@ -18,6 +21,7 @@ export default function HomePage() {
     loading: notesLoading,
     error,
     addContext,
+    updateContext,
     removeContext,
     addNote,
     updateNote,
@@ -30,6 +34,8 @@ export default function HomePage() {
   const [activeContextId, setActiveContextId] = useState<string>("")
   const [saving, setSaving] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showNewContextInput, setShowNewContextInput] = useState(false)
+  const isMobile = useMobile()
 
   // Set active context when contexts load
   useEffect(() => {
@@ -53,6 +59,15 @@ export default function HomePage() {
     }
   }
 
+  const handleUpdateContext = async (contextId: string, name: string) => {
+    setSaving(true)
+    try {
+      await updateContext(contextId, name)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleRemoveContext = async (contextId: string) => {
     if (contexts.length <= 1) return
 
@@ -68,21 +83,21 @@ export default function HomePage() {
     }
   }
 
-  const handleSaveNote = async (content: string) => {
+  const handleSaveNote = async (title: string, content: string) => {
     if (!activeContextId || !user) return
 
     setSaving(true)
     try {
-      await addNote(activeContextId, content, user.id)
+      await addNote(activeContextId, title, content, user.id)
     } finally {
       setSaving(false)
     }
   }
 
-  const handleEditNote = async (noteId: string, content: string) => {
+  const handleEditNote = async (noteId: string, title: string, content: string) => {
     setSaving(true)
     try {
-      await updateNote(noteId, content)
+      await updateNote(noteId, title, content)
     } finally {
       setSaving(false)
     }
@@ -111,7 +126,7 @@ export default function HomePage() {
   // Loading state
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="flex items-center gap-3 text-primary">
           <LoadingSpinner size="lg" />
           <span className="text-lg font-medium">Loading...</span>
@@ -134,7 +149,7 @@ export default function HomePage() {
   // Notes loading state
   if (notesLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="flex items-center gap-3 text-primary">
           <LoadingSpinner size="lg" />
           <span className="text-lg font-medium">Loading your notes...</span>
@@ -155,19 +170,33 @@ export default function HomePage() {
         isMobileMenuOpen={mobileMenuOpen}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          <Sidebar
-            contexts={contexts}
-            activeContextId={activeContextId}
-            user={user}
-            saving={saving}
-            onContextSelect={setActiveContextId}
-            onContextAdd={handleAddContext}
-            onContextRemove={handleRemoveContext}
-          />
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block">
+            <Sidebar
+              contexts={contexts}
+              activeContextId={activeContextId}
+              user={user}
+              saving={saving}
+              onContextSelect={setActiveContextId}
+              onContextAdd={handleAddContext}
+              onContextUpdate={handleUpdateContext}
+              onContextRemove={handleRemoveContext}
+            />
+          </div>
 
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 space-y-4 sm:space-y-5 lg:space-y-6">
+            {/* Mobile Context Selector */}
+            <div className="lg:hidden">
+              <MobileContextSelector
+                contexts={contexts}
+                activeContextId={activeContextId}
+                onContextSelect={setActiveContextId}
+                onAddContext={() => setShowNewContextInput(true)}
+              />
+            </div>
+
             <NoteEditor activeContext={activeContext} user={user} saving={saving} onSave={handleSaveNote} />
 
             <NotesList
@@ -180,6 +209,9 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Debug Info - Only in development */}
+      {process.env.NODE_ENV === "development" && <DebugInfo contexts={contexts} activeContextId={activeContextId} />}
     </div>
   )
 }

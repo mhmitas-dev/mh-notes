@@ -76,6 +76,25 @@ export function useNotes() {
     }
   }
 
+  const updateContext = async (contextId: string, name: string) => {
+    try {
+      const { data: updatedContext, error } = await NotesService.updateContext(contextId, name)
+
+      if (error) throw error
+
+      setState((prev) => ({
+        ...prev,
+        contexts: prev.contexts.map((c) => (c.id === contextId ? updatedContext! : c)),
+      }))
+
+      return updatedContext!
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to update context"
+      setState((prev) => ({ ...prev, error: errorMessage }))
+      throw err
+    }
+  }
+
   const removeContext = async (contextId: string) => {
     try {
       const { error } = await NotesService.deleteContext(contextId)
@@ -94,9 +113,9 @@ export function useNotes() {
     }
   }
 
-  const addNote = async (contextId: string, content: string, userId: string) => {
+  const addNote = async (contextId: string, title: string, content: string, userId: string) => {
     try {
-      const { data: newNote, error } = await NotesService.createNote({ contextId, content, userId })
+      const { data: newNote, error } = await NotesService.createNote({ contextId, title, content, userId })
 
       if (error) throw error
 
@@ -113,9 +132,9 @@ export function useNotes() {
     }
   }
 
-  const updateNote = async (noteId: string, content: string) => {
+  const updateNote = async (noteId: string, title: string, content: string) => {
     try {
-      const { data: updatedNote, error } = await NotesService.updateNote({ noteId, content })
+      const { data: updatedNote, error } = await NotesService.updateNote({ noteId, title, content })
 
       if (error) throw error
 
@@ -160,6 +179,7 @@ export function useNotes() {
   return {
     ...state,
     addContext,
+    updateContext,
     removeContext,
     addNote,
     updateNote,

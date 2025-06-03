@@ -15,6 +15,7 @@ export interface Context {
 export interface Note {
   id: string
   context_id: string
+  title: string
   content: string
   user_id: string
   created_at: string
@@ -45,11 +46,13 @@ export interface CreateContextData {
 
 export interface CreateNoteData {
   contextId: string
+  title: string
   content: string
   userId: string
 }
 
 export interface UpdateNoteData {
   noteId: string
+  title: string
   content: string
 }

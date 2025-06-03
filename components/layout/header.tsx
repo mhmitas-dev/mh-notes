@@ -19,26 +19,26 @@ interface HeaderProps {
 export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, isMobileMenuOpen }: HeaderProps) {
   return (
     <header className="bg-card border-b border-border sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold text-primary">{APP_CONFIG.name}</h1>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+        <div className="flex items-center justify-between h-12 sm:h-14 lg:h-16">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <h1 className="text-lg sm:text-xl font-bold text-primary">{APP_CONFIG.name}</h1>
             {user && (
-              <Badge variant="secondary" className="hidden sm:inline-flex">
+              <Badge variant="secondary" className="hidden sm:inline-flex text-xs px-2 py-1">
                 {user.email}
               </Badge>
             )}
           </div>
 
           <div className="hidden md:block">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 lg:space-x-2">
               {error && <ErrorMessage message={error} variant="destructive" />}
 
               <Button
                 onClick={onRefresh}
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                 title="Refresh data"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -47,7 +47,7 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                 title="Search notes"
               >
                 <Search className="w-4 h-4" />
@@ -56,7 +56,7 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                 title="Settings"
               >
                 <Settings className="w-4 h-4" />
@@ -67,10 +67,10 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
                   onClick={onSignOut}
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground px-2 lg:px-3"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+                  <LogOut className="w-4 h-4 mr-1 lg:mr-2" />
+                  <span className="hidden lg:inline">Sign Out</span>
                 </Button>
               )}
             </div>
@@ -81,7 +81,7 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
               onClick={onToggleMobileMenu}
               variant="ghost"
               size="sm"
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
             >
               <Menu className="w-5 h-5" />
             </Button>
@@ -91,10 +91,10 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-card border-b border-border px-4 py-3">
-          <div className="flex flex-col space-y-3">
+        <div className="md:hidden bg-card border-b border-border px-3 py-2 sm:px-4 sm:py-3">
+          <div className="flex flex-col space-y-2 sm:space-y-3">
             {user && (
-              <Badge variant="secondary" className="self-start">
+              <Badge variant="secondary" className="self-start text-xs px-2 py-1">
                 {user.email}
               </Badge>
             )}
@@ -105,7 +105,7 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
                 onClick={onRefresh}
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                 title="Refresh data"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -114,7 +114,7 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                 title="Search notes"
               >
                 <Search className="w-4 h-4" />
@@ -123,7 +123,7 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                 title="Settings"
               >
                 <Settings className="w-4 h-4" />
@@ -135,7 +135,7 @@ export function Header({ user, error, onRefresh, onSignOut, onToggleMobileMenu, 
                 onClick={onSignOut}
                 variant="ghost"
                 size="sm"
-                className="justify-start text-muted-foreground hover:text-foreground"
+                className="justify-start text-muted-foreground hover:text-foreground px-2"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out

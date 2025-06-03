@@ -13,6 +13,10 @@ export const validateContextName = (name: string): boolean => {
   return name.trim().length > 0 && name.length <= VALIDATION.CONTEXT_NAME_MAX_LENGTH
 }
 
+export const validateNoteTitle = (title: string): boolean => {
+  return title.trim().length > 0 && title.length <= VALIDATION.NOTE_TITLE_MAX_LENGTH
+}
+
 export const validateNoteContent = (content: string): boolean => {
   return content.trim().length > 0 && content.length <= VALIDATION.NOTE_CONTENT_MAX_LENGTH
 }
