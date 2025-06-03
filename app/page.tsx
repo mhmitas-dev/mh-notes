@@ -196,7 +196,7 @@ export default function HomePage() {
             />
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 *:mb-5">
             {/* Mobile Context Selector */}
             <div className="lg:hidden">
               <MobileContextSelector
