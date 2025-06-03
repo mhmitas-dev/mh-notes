@@ -36,14 +36,19 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showNewContextInput, setShowNewContextInput] = useState(false)
   const isMobile = useMobile()
+  const [authInitialized, setAuthInitialized] = useState(false)
 
   // Load data when user authentication state changes
   useEffect(() => {
-    if (user) {
-      // User is authenticated, load their data
+    if (user && !authInitialized) {
+      // User is authenticated for the first time, load their data
       refreshData(user.id)
+      setAuthInitialized(true)
+    } else if (!user && authInitialized) {
+      // User signed out, reset the flag
+      setAuthInitialized(false)
     }
-  }, [user, refreshData])
+  }, [user, authInitialized, refreshData])
 
   // Set active context when contexts load
   useEffect(() => {
@@ -131,6 +136,7 @@ export default function HomePage() {
     await signOut()
     setActiveContextId("")
     setMobileMenuOpen(false)
+    setAuthInitialized(false)
   }
 
   // Loading state

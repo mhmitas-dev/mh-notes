@@ -11,44 +11,55 @@ export function useNotes() {
     loading: true,
     error: null,
   })
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
 
   // Make loadData a useCallback function so we can use it as a dependency
-  const loadData = useCallback(async (userId?: string) => {
-    try {
-      setState((prev) => ({ ...prev, loading: true, error: null }))
-
-      // Load contexts
-      const { data: contextsData, error: contextsError } = await NotesService.getContexts()
-
-      if (contextsError) throw contextsError
-
-      let contexts = contextsData || []
-
-      // Create default contexts if none exist and we have a userId
-      if (contexts.length === 0 && userId) {
-        const { data: defaultContexts } = await NotesService.createDefaultContexts(userId)
-        contexts = defaultContexts || []
+  const loadData = useCallback(
+    async (userId?: string, force = false) => {
+      // Don't reload if we've already loaded data unless forced
+      if (hasInitiallyLoaded && !force) {
+        return
       }
 
-      // Load notes
-      const { data: notesData, error: notesError } = await NotesService.getNotes()
+      try {
+        setState((prev) => ({ ...prev, loading: true, error: null }))
 
-      if (notesError) throw notesError
+        // Load contexts
+        const { data: contextsData, error: contextsError } = await NotesService.getContexts()
 
-      setState((prev) => ({
-        ...prev,
-        contexts,
-        notes: notesData || [],
-        loading: false,
-      }))
-    } catch (err) {
-      setState((prev) => ({
-        ...prev,
-        error: err instanceof Error ? err.message : "An error occurred",
-        loading: false,
-      }))
-    }
-  }, [])
+        if (contextsError) throw contextsError
+
+        let contexts = contextsData || []
+
+        // Create default contexts if none exist and we have a userId
+        if (contexts.length === 0 && userId) {
+          const { data: defaultContexts } = await NotesService.createDefaultContexts(userId)
+          contexts = defaultContexts || []
+        }
+
+        // Load notes
+        const { data: notesData, error: notesError } = await NotesService.getNotes()
+
+        if (notesError) throw notesError
+
+        setState((prev) => ({
+          ...prev,
+          contexts,
+          notes: notesData || [],
+          loading: false,
+        }))
+
+        setHasInitiallyLoaded(true)
+      } catch (err) {
+        setState((prev) => ({
+          ...prev,
+          error: err instanceof Error ? err.message : "An error occurred",
+          loading: false,
+        }))
+      }
+    },
+    [hasInitiallyLoaded],
+  )
 
   // Initial data load - we'll handle this differently now
   useEffect(() => {
@@ -174,6 +185,13 @@ export function useNotes() {
     setState((prev) => ({ ...prev, error: null }))
   }
 
+  const refreshData = useCallback(
+    async (userId?: string) => {
+      return loadData(userId, true)
+    },
+    [loadData],
+  )
+
   return {
     ...state,
     addContext,
@@ -183,7 +201,8 @@ export function useNotes() {
     updateNote,
     deleteNote,
     getNotesForContext,
-    refreshData: loadData,
+    loadData, // For initial load
+    refreshData, // For manual refresh
     clearError,
   }
 }
