@@ -65,7 +65,7 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
           minHeight={120}
           maxHeight={500}
           disabled={isDisabled}
-          className="text-sm leading-relaxed custom-scrollbar"
+          className="leading-relaxed custom-scrollbar"
         />
 
         <div className="flex justify-between items-center">
