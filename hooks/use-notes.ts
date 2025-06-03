@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { NotesService } from "@/lib/services/notes.service"
 import { AuthService } from "@/lib/services/auth.service"
-import type { Note, NotesState, CreateContextData, CreateNoteData, UpdateNoteData } from "@/lib/types"
+import type { Note, NotesState } from "@/lib/types"
 
 export function useNotes() {
   const [state, setState] = useState<NotesState>({
@@ -57,9 +57,9 @@ export function useNotes() {
     }
   }
 
-  const addContext = async (data: CreateContextData) => {
+  const addContext = async (name: string, userId: string) => {
     try {
-      const { data: newContext, error } = await NotesService.createContext(data)
+      const { data: newContext, error } = await NotesService.createContext({ name, userId })
 
       if (error) throw error
 
@@ -94,9 +94,9 @@ export function useNotes() {
     }
   }
 
-  const addNote = async (data: CreateNoteData) => {
+  const addNote = async (contextId: string, content: string, userId: string) => {
     try {
-      const { data: newNote, error } = await NotesService.createNote(data)
+      const { data: newNote, error } = await NotesService.createNote({ contextId, content, userId })
 
       if (error) throw error
 
@@ -113,15 +113,15 @@ export function useNotes() {
     }
   }
 
-  const updateNote = async (data: UpdateNoteData) => {
+  const updateNote = async (noteId: string, content: string) => {
     try {
-      const { data: updatedNote, error } = await NotesService.updateNote(data)
+      const { data: updatedNote, error } = await NotesService.updateNote({ noteId, content })
 
       if (error) throw error
 
       setState((prev) => ({
         ...prev,
-        notes: prev.notes.map((note) => (note.id === data.noteId ? updatedNote! : note)),
+        notes: prev.notes.map((note) => (note.id === noteId ? updatedNote! : note)),
       }))
 
       return updatedNote!

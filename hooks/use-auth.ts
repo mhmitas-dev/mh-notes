@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { AuthService } from "@/lib/services/auth.service"
-import type { User, AuthFormData } from "@/lib/types"
+import type { User } from "@/lib/types"
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -27,12 +27,12 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signUp = async (formData: AuthFormData) => {
-    return AuthService.signUp(formData)
+  const signUp = async (email: string, password: string) => {
+    return AuthService.signUp({ email, password })
   }
 
-  const signIn = async (formData: AuthFormData) => {
-    return AuthService.signIn(formData)
+  const signIn = async (email: string, password: string) => {
+    return AuthService.signIn({ email, password })
   }
 
   const signInWithGoogle = async () => {

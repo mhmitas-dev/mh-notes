@@ -46,7 +46,7 @@ export default function HomePage() {
 
     setSaving(true)
     try {
-      const newContext = await addContext({ name, userId: user.id })
+      const newContext = await addContext(name, user.id)
       setActiveContextId(newContext.id)
     } finally {
       setSaving(false)
@@ -73,7 +73,7 @@ export default function HomePage() {
 
     setSaving(true)
     try {
-      await addNote({ contextId: activeContextId, content, userId: user.id })
+      await addNote(activeContextId, content, user.id)
     } finally {
       setSaving(false)
     }
@@ -82,7 +82,7 @@ export default function HomePage() {
   const handleEditNote = async (noteId: string, content: string) => {
     setSaving(true)
     try {
-      await updateNote({ noteId, content })
+      await updateNote(noteId, content)
     } finally {
       setSaving(false)
     }
@@ -122,7 +122,13 @@ export default function HomePage() {
 
   // Authentication required
   if (!user) {
-    return <AuthForm onSignUp={signUp} onSignIn={signIn} onGoogleSignIn={signInWithGoogle} />
+    return (
+      <AuthForm
+        onSignUp={({ email, password }) => signUp(email, password)}
+        onSignIn={({ email, password }) => signIn(email, password)}
+        onGoogleSignIn={signInWithGoogle}
+      />
+    )
   }
 
   // Notes loading state

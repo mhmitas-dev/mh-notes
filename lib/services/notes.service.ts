@@ -5,7 +5,6 @@ import { DEFAULT_CONTEXTS } from "@/lib/constants"
 export class NotesService {
   static async getContexts(): Promise<{ data: Context[] | null; error: any }> {
     const { data, error } = await supabase.from("contexts").select("*").order("created_at", { ascending: true })
-
     return { data, error }
   }
 
@@ -15,13 +14,11 @@ export class NotesService {
       .insert([{ name, user_id: userId }])
       .select()
       .single()
-
     return { data, error }
   }
 
   static async deleteContext(contextId: string): Promise<{ error: any }> {
     const { error } = await supabase.from("contexts").delete().eq("id", contextId)
-
     return { error }
   }
 
@@ -35,13 +32,11 @@ export class NotesService {
         })),
       )
       .select()
-
     return { data, error }
   }
 
   static async getNotes(): Promise<{ data: Note[] | null; error: any }> {
     const { data, error } = await supabase.from("notes").select("*").order("created_at", { ascending: false })
-
     return { data, error }
   }
 
@@ -51,7 +46,6 @@ export class NotesService {
       .insert([{ context_id: contextId, content, user_id: userId }])
       .select()
       .single()
-
     return { data, error }
   }
 
@@ -62,13 +56,14 @@ export class NotesService {
       .eq("id", noteId)
       .select()
       .single()
-
     return { data, error }
   }
 
   static async deleteNote(noteId: string): Promise<{ error: any }> {
     const { error } = await supabase.from("notes").delete().eq("id", noteId)
-
     return { error }
   }
 }
+
+// Also export as default for compatibility
+export default NotesService

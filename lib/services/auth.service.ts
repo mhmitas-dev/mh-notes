@@ -49,3 +49,6 @@ export class AuthService {
     return { session, error }
   }
 }
+
+// Also export as default for compatibility
+export default AuthService
