@@ -11,36 +11,67 @@ export function useAuth() {
 
   useEffect(() => {
     // Get initial session
-    AuthService.getSession().then(({ session }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    const initAuth = async () => {
+      setLoading(true)
+      try {
+        const { session } = await AuthService.getSession()
+        setUser(session?.user ?? null)
+      } catch (error) {
+        console.error("Auth initialization error:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    initAuth()
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
-      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
   const signUp = async (email: string, password: string) => {
-    return AuthService.signUp({ email, password })
+    setLoading(true)
+    try {
+      const result = await AuthService.signUp({ email, password })
+      return result
+    } finally {
+      setLoading(false)
+    }
   }
 
   const signIn = async (email: string, password: string) => {
-    return AuthService.signIn({ email, password })
+    setLoading(true)
+    try {
+      const result = await AuthService.signIn({ email, password })
+      return result
+    } finally {
+      setLoading(false)
+    }
   }
 
   const signInWithGoogle = async () => {
-    return AuthService.signInWithGoogle()
+    setLoading(true)
+    try {
+      return await AuthService.signInWithGoogle()
+    } finally {
+      // Note: We don't set loading to false here because the page will redirect
+      // and the component will unmount
+    }
   }
 
   const signOut = async () => {
-    return AuthService.signOut()
+    setLoading(true)
+    try {
+      return await AuthService.signOut()
+    } finally {
+      setLoading(false)
+    }
   }
 
   return {

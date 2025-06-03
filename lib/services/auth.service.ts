@@ -48,6 +48,12 @@ export class AuthService {
     } = await supabase.auth.getSession()
     return { session, error }
   }
+
+  // Add a method to refresh the session
+  static async refreshSession() {
+    const { data, error } = await supabase.auth.refreshSession()
+    return { data, error }
+  }
 }
 
 // Also export as default for compatibility

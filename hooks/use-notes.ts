@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { NotesService } from "@/lib/services/notes.service"
-import { AuthService } from "@/lib/services/auth.service"
 import type { Note, NotesState } from "@/lib/types"
 
 export function useNotes() {
@@ -13,11 +12,8 @@ export function useNotes() {
     error: null,
   })
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  // Make loadData a useCallback function so we can use it as a dependency
+  const loadData = useCallback(async (userId?: string) => {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }))
 
@@ -28,13 +24,10 @@ export function useNotes() {
 
       let contexts = contextsData || []
 
-      // Create default contexts if none exist
-      if (contexts.length === 0) {
-        const { user } = await AuthService.getCurrentUser()
-        if (user) {
-          const { data: defaultContexts } = await NotesService.createDefaultContexts(user.id)
-          contexts = defaultContexts || []
-        }
+      // Create default contexts if none exist and we have a userId
+      if (contexts.length === 0 && userId) {
+        const { data: defaultContexts } = await NotesService.createDefaultContexts(userId)
+        contexts = defaultContexts || []
       }
 
       // Load notes
@@ -55,7 +48,12 @@ export function useNotes() {
         loading: false,
       }))
     }
-  }
+  }, [])
+
+  // Initial data load - we'll handle this differently now
+  useEffect(() => {
+    // We'll check for user in the page component and call loadData there
+  }, [])
 
   const addContext = async (name: string, userId: string) => {
     try {

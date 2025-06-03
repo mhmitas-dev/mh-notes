@@ -233,11 +233,9 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
                       Edited
                     </Badge>
                   )}
-                  {isLongNote && (
-                    <Badge variant="outline" className="text-xs px-1.5 py-0.5 text-muted-foreground">
-                      {note.content.length} chars
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className="text-xs px-1.5 py-0.5 text-muted-foreground">
+                    {note.content.length} chars
+                  </Badge>
                 </div>
               </div>
 

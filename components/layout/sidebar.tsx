@@ -17,7 +17,6 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -137,12 +136,12 @@ export function Sidebar({
   const renderContextItem = (context: Context) => {
     if (editingContextId === context.id) {
       return (
-        <div key={context.id} className="flex items-center gap-1 p-1">
+        <div key={context.id} className="flex items-center gap-2 p-2">
           <Input
             value={editingContextName}
             onChange={(e) => setEditingContextName(e.target.value)}
             onKeyDown={(e) => handleKeyDown(e, handleSaveEditing)}
-            className="h-7 sm:h-8 text-sm px-2"
+            className="h-8 text-sm px-2 border-border/60"
             autoFocus
             disabled={saving}
           />
@@ -150,19 +149,19 @@ export function Sidebar({
             onClick={handleSaveEditing}
             variant="ghost"
             size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0"
+            className="h-8 w-8 p-0 flex-shrink-0 hover:bg-accent"
             disabled={!validateContextName(editingContextName) || saving}
           >
-            <Check className="h-3 w-3 sm:h-4 sm:w-4" />
+            <Check className="h-4 w-4" />
           </Button>
           <Button
             onClick={handleCancelEditing}
             variant="ghost"
             size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0"
+            className="h-8 w-8 p-0 flex-shrink-0 hover:bg-accent"
             disabled={saving}
           >
-            <X className="h-3 w-3 sm:h-4 sm:w-4" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -177,8 +176,9 @@ export function Sidebar({
             onClick={() => onContextSelect(context.id)}
             variant={isActive ? "secondary" : "outline"}
             className={cn(
-              "w-full h-16 sm:h-18 p-2 text-xs sm:text-sm font-normal flex flex-col items-center justify-center gap-1",
-              isActive && "bg-secondary text-secondary-foreground border-primary/50",
+              "w-full h-16 sm:h-18 p-3 text-xs sm:text-sm font-normal flex flex-col items-center justify-center gap-1.5",
+              "border-border/50 hover:border-border transition-colors duration-200",
+              isActive && "bg-secondary/80 text-secondary-foreground border-primary/30 shadow-sm",
             )}
           >
             <FolderOpen className="w-4 h-4 flex-shrink-0" />
@@ -195,9 +195,9 @@ export function Sidebar({
                 disabled={saving}
                 variant="ghost"
                 size="icon"
-                className="h-5 w-5 p-0 hover:bg-accent hover:text-accent-foreground"
+                className="h-6 w-6 p-0 hover:bg-accent hover:text-accent-foreground"
               >
-                <Edit className="w-2.5 h-2.5" />
+                <Edit className="w-3 h-3" />
               </Button>
               <Button
                 onClick={(e) => {
@@ -207,9 +207,9 @@ export function Sidebar({
                 disabled={saving}
                 variant="ghost"
                 size="icon"
-                className="h-5 w-5 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
               >
-                <Trash2 className="w-2.5 h-2.5" />
+                <Trash2 className="w-3 h-3" />
               </Button>
             </div>
           )}
@@ -223,16 +223,17 @@ export function Sidebar({
           onClick={() => onContextSelect(context.id)}
           variant={isActive ? "secondary" : "ghost"}
           className={cn(
-            "w-full justify-start text-left font-normal h-8 sm:h-9 px-2 sm:px-3 text-sm",
-            isActive && "bg-secondary text-secondary-foreground",
+            "w-full justify-start text-left font-normal h-9 px-3 text-sm",
+            "hover:bg-accent hover:text-accent-foreground transition-colors duration-200",
+            isActive && "bg-secondary/80 text-secondary-foreground shadow-sm",
           )}
         >
-          <FolderOpen className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
+          <FolderOpen className="w-4 h-4 mr-3 flex-shrink-0" />
           <span className="truncate">{context.name}</span>
         </Button>
 
         {!editingContextId && contexts.length > 1 && (
-          <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
             <Button
               onClick={() => handleStartEditing(context)}
               disabled={saving}
@@ -261,39 +262,41 @@ export function Sidebar({
 
   return (
     <div className="w-full lg:w-64 flex-shrink-0">
-      <Card className="shadow-sm">
+      <div className="bg-background rounded-lg border border-border/50 shadow-sm overflow-hidden">
         <Collapsible open={!isContextsCollapsed} onOpenChange={setIsContextsCollapsed}>
-          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
+          {/* Header */}
+          <div className="px-4 py-3 bg-muted/30">
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-between p-0 h-auto hover:bg-transparent">
-                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                  {isContextsCollapsed ? (
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-                  )}
-                  <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Contexts
-                  <Badge variant="secondary" className="ml-auto text-xs px-1.5 py-0.5">
-                    {contexts.length}
-                  </Badge>
-                </CardTitle>
+                <div className="flex items-center gap-2">
+                  {isContextsCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
+                    <FolderOpen className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-base font-semibold text-foreground">Contexts</h2>
+                    <p className="text-xs text-muted-foreground">Organize your notes</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="text-xs px-2 py-1">
+                  {contexts.length}
+                </Badge>
               </Button>
             </CollapsibleTrigger>
-          </CardHeader>
+          </div>
 
           <CollapsibleContent>
-            <CardContent className="px-2 sm:px-3 pb-3 sm:pb-4 space-y-3">
+            <div className="px-4 py-4 space-y-4">
               {/* Search and View Controls */}
               {contexts.length > 3 && (
-                <div className="space-y-2 px-1">
+                <div className="space-y-3">
                   <div className="relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search contexts..."
-                      className="h-7 sm:h-8 text-sm pl-7 pr-2"
+                      className="h-9 text-sm pl-9 pr-3 border-border/60 focus:border-primary/60"
                     />
                   </div>
 
@@ -303,7 +306,7 @@ export function Sidebar({
                         onClick={() => setViewMode("list")}
                         variant={viewMode === "list" ? "secondary" : "ghost"}
                         size="sm"
-                        className="h-6 w-6 p-0"
+                        className="h-7 w-7 p-0"
                       >
                         <List className="w-3 h-3" />
                       </Button>
@@ -311,13 +314,13 @@ export function Sidebar({
                         onClick={() => setViewMode("grid")}
                         variant={viewMode === "grid" ? "secondary" : "ghost"}
                         size="sm"
-                        className="h-6 w-6 p-0"
+                        className="h-7 w-7 p-0"
                       >
                         <Grid3X3 className="w-3 h-3" />
                       </Button>
                     </div>
                     {searchQuery && (
-                      <Button onClick={() => setSearchQuery("")} variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                      <Button onClick={() => setSearchQuery("")} variant="ghost" size="sm" className="h-7 px-2 text-xs">
                         Clear
                       </Button>
                     )}
@@ -328,8 +331,8 @@ export function Sidebar({
               {/* Contexts List */}
               <div className="space-y-1">
                 {hasSearchResults ? (
-                  <div className="text-center py-4 text-sm text-muted-foreground">
-                    No contexts found for "{searchQuery}"
+                  <div className="text-center py-6 text-sm text-muted-foreground">
+                    <p>No contexts found for "{searchQuery}"</p>
                   </div>
                 ) : (
                   <ScrollArea
@@ -348,7 +351,7 @@ export function Sidebar({
 
               {/* Add new context */}
               {showNewContextInput ? (
-                <div className="space-y-2 pt-2 mt-2 border-t border-border px-1">
+                <div className="space-y-3 pt-3 border-t border-border/50">
                   <Input
                     value={newContextName}
                     onChange={(e) => setNewContextName(e.target.value)}
@@ -356,13 +359,13 @@ export function Sidebar({
                     onKeyDown={(e) => handleKeyDown(e, handleAddContext)}
                     autoFocus
                     disabled={saving}
-                    className="h-7 sm:h-8 text-sm px-2"
+                    className="h-9 text-sm px-3 border-border/60"
                   />
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-2">
                     <Button
                       onClick={handleAddContext}
                       size="sm"
-                      className="flex-1 h-7 sm:h-8 text-xs px-2"
+                      className="flex-1 h-8 text-xs"
                       disabled={!validateContextName(newContextName) || saving}
                     >
                       {saving ? <LoadingSpinner size="sm" /> : "Add"}
@@ -374,7 +377,7 @@ export function Sidebar({
                       }}
                       size="sm"
                       variant="outline"
-                      className="flex-1 h-7 sm:h-8 text-xs px-2"
+                      className="flex-1 h-8 text-xs"
                       disabled={saving}
                     >
                       Cancel
@@ -387,37 +390,37 @@ export function Sidebar({
                   disabled={saving}
                   variant="outline"
                   size="sm"
-                  className="w-full mt-2 border-dashed h-8 sm:h-9 text-sm px-2"
+                  className="w-full mt-3 border-dashed h-9 text-sm px-3 border-border/60 hover:border-border"
                 >
-                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <Plus className="w-4 h-4 mr-2" />
                   Add Context
                 </Button>
               )}
-            </CardContent>
+            </div>
           </CollapsibleContent>
         </Collapsible>
-      </Card>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={contextToDelete !== null} onOpenChange={(open) => !open && setContextToDelete(null)}>
         <AlertDialogContent className="mx-4 max-w-md">
-          <AlertDialogHeader className="space-y-2 sm:space-y-3">
-            <AlertDialogTitle className="text-lg sm:text-xl">Delete Context</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm sm:text-base">
+          <AlertDialogHeader className="space-y-3">
+            <AlertDialogTitle className="text-lg">Delete Context</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
               Are you sure you want to delete this context? This action will permanently remove the context and all
               notes within it. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-3">
-            <AlertDialogCancel disabled={saving} className="h-8 sm:h-9 px-3 sm:px-4 text-sm">
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel disabled={saving} className="h-9 px-4 text-sm">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               disabled={saving}
-              className="bg-destructive hover:bg-destructive/90 h-8 sm:h-9 px-3 sm:px-4 text-sm"
+              className="bg-destructive hover:bg-destructive/90 h-9 px-4 text-sm"
             >
-              {saving ? <LoadingSpinner size="sm" className="mr-1.5" /> : <Trash2 className="w-3 h-3 mr-1.5" />}
+              {saving ? <LoadingSpinner size="sm" className="mr-2" /> : <Trash2 className="w-3 h-3 mr-2" />}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

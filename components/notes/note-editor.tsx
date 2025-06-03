@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AutoResizeTextarea } from "@/components/ui/auto-resize-textarea"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { validateNoteTitle, validateNoteContent } from "@/lib/utils/validation"
 import { PenTool, Save } from "lucide-react"
+import { cn } from "@/lib/utils"
 import type { Context, User } from "@/lib/types"
 
 interface NoteEditorProps {
@@ -49,56 +49,104 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
   const canSave = validateNoteTitle(title) && validateNoteContent(content) && !isDisabled
 
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
-        <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-          <PenTool className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="truncate">{activeContext ? `Writing in ${activeContext.name}` : "Select a context"}</span>
-        </CardTitle>
-      </CardHeader>
+    <div className="bg-background rounded-lg border border-border/50 shadow-sm overflow-hidden">
+      {/* Header */}
+      <div className="px-4 sm:px-6 py-3 sm:py-4 bg-muted/30">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/10">
+            <PenTool className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base sm:text-lg font-semibold text-foreground truncate">
+              {activeContext ? `Writing in ${activeContext.name}` : "Select a context"}
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              {activeContext ? "Create a new note" : "Choose a context to start writing"}
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-3 sm:space-y-4">
-        <div className="space-y-2 sm:space-y-3">
+      {/* Content */}
+      <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
+        {/* Title Input */}
+        <div className="space-y-2">
+          <label htmlFor="note-title" className="text-sm font-medium text-foreground">
+            Title
+          </label>
           <Input
+            id="note-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={activeContext ? "Note title..." : "Select a context to start writing"}
+            placeholder={activeContext ? "Enter note title..." : "Select a context to start writing"}
             disabled={isDisabled}
-            className="text-sm sm:text-base font-medium"
+            className={cn(
+              "text-sm sm:text-base font-medium bg-background",
+              "border-border/60 focus:border-primary/60 focus:ring-primary/20",
+              "transition-colors duration-200",
+            )}
             maxLength={100}
           />
+        </div>
 
+        {/* Content Textarea */}
+        <div className="space-y-2">
+          <label htmlFor="note-content" className="text-sm font-medium text-foreground">
+            Content
+          </label>
           <AutoResizeTextarea
+            id="note-content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={
               activeContext
-                ? "Write your note content here... (Ctrl+Enter to save)"
+                ? "Write your note content here...\n\nTip: Use Ctrl+Enter to save quickly"
                 : "Select a context to start writing"
             }
-            minHeight={100}
+            minHeight={120}
             maxHeight={400}
             disabled={isDisabled}
-            className="leading-relaxed custom-scrollbar text-sm sm:text-base px-3 py-2 sm:px-3 sm:py-2.5"
+            className={cn(
+              "leading-relaxed custom-scrollbar text-sm sm:text-base",
+              "bg-background border-border/60 focus:border-primary/60 focus:ring-primary/20",
+              "transition-colors duration-200 resize-none",
+              "px-3 py-3 sm:px-4 sm:py-3",
+            )}
           />
         </div>
 
-        <div className="flex justify-between items-center gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+        {/* Footer with stats and save button */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 pt-2">
+          {/* Character counts and indicators */}
+          <div className="flex items-center gap-2 flex-wrap">
             {title.length > 0 && (
-              <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+              <Badge
+                variant="secondary"
+                className={cn(
+                  "text-xs px-2 py-1 font-normal",
+                  title.length > 80 && "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+                )}
+              >
                 Title: {title.length}/100
               </Badge>
             )}
             {content.length > 0 && (
               <>
-                <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                  Content: {content.length} chars
+                <Badge variant="outline" className="text-xs px-2 py-1 font-normal">
+                  {content.length} characters
                 </Badge>
+                {content.split("\n").length > 1 && (
+                  <Badge variant="outline" className="text-xs px-2 py-1 font-normal">
+                    {content.split("\n").length} lines
+                  </Badge>
+                )}
                 {content.length > 1000 && (
-                  <Badge variant="outline" className="text-xs text-amber-600 px-1.5 py-0.5">
+                  <Badge
+                    variant="outline"
+                    className="text-xs px-2 py-1 font-normal text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-600"
+                  >
                     Long note
                   </Badge>
                 )}
@@ -106,21 +154,31 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
             )}
           </div>
 
-          <Button onClick={handleSave} disabled={!canSave} size="sm" className="h-8 sm:h-9 px-3 sm:px-4 text-sm">
+          {/* Save button */}
+          <Button
+            onClick={handleSave}
+            disabled={!canSave}
+            size="sm"
+            className={cn(
+              "h-9 px-4 text-sm font-medium min-w-[100px]",
+              "transition-all duration-200",
+              canSave && "shadow-sm hover:shadow-md",
+            )}
+          >
             {saving ? (
               <>
-                <LoadingSpinner size="sm" className="mr-1.5" />
+                <LoadingSpinner size="sm" className="mr-2" />
                 Saving...
               </>
             ) : (
               <>
-                <Save className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5" />
+                <Save className="w-4 h-4 mr-2" />
                 Save Note
               </>
             )}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

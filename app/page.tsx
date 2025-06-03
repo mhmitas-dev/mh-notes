@@ -37,6 +37,14 @@ export default function HomePage() {
   const [showNewContextInput, setShowNewContextInput] = useState(false)
   const isMobile = useMobile()
 
+  // Load data when user authentication state changes
+  useEffect(() => {
+    if (user) {
+      // User is authenticated, load their data
+      refreshData(user.id)
+    }
+  }, [user, refreshData])
+
   // Set active context when contexts load
   useEffect(() => {
     if (contexts.length > 0 && !activeContextId) {
@@ -114,7 +122,9 @@ export default function HomePage() {
 
   const handleRefresh = () => {
     clearError()
-    refreshData()
+    if (user) {
+      refreshData(user.id)
+    }
   }
 
   const handleSignOut = async () => {
@@ -171,9 +181,9 @@ export default function HomePage() {
       />
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6 items-start">
           {/* Desktop Sidebar */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:block lg:sticky lg:top-20">
             <Sidebar
               contexts={contexts}
               activeContextId={activeContextId}
@@ -186,7 +196,7 @@ export default function HomePage() {
             />
           </div>
 
-          <div className="flex-1 space-y-4 sm:space-y-5 lg:space-y-6">
+          <div className="flex-1 min-w-0">
             {/* Mobile Context Selector */}
             <div className="lg:hidden">
               <MobileContextSelector
