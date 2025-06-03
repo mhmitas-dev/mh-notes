@@ -20,7 +20,7 @@ interface NoteEditorProps {
 }
 
 export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorProps) {
-  const [title, setTitle] = useState("")
+  const [title, setTitle] = useState("Untitled Note")
   const [content, setContent] = useState("")
 
   const handleSave = async () => {
