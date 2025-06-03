@@ -144,9 +144,6 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
                     </Badge>
                   )}
                 </div>
-                <Badge variant="outline" className="text-xs w-fit">
-                  {note.content.length} characters
-                </Badge>
               </div>
 
               <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
