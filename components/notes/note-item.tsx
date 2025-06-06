@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AutoResizeTextarea } from "@/components/ui/auto-resize-textarea"
@@ -12,25 +12,67 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatDate, isEdited } from "@/lib/utils/date"
 import { validateNoteTitle, validateNoteContent } from "@/lib/utils/validation"
-import { Edit, Trash2, Save, X, ChevronDown, ChevronUp } from "lucide-react"
+import { Edit, Trash2, Save, X, ChevronDown, ChevronUp, MoreVertical, FolderOpen } from "lucide-react"
 import { NOTE_DISPLAY } from "@/lib/constants"
-import type { Note } from "@/lib/types"
+import type { Note, Context } from "@/lib/types"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useMobile } from "@/hooks/use-mobile"
 
 interface NoteItemProps {
   note: Note
+  contexts: Context[]
+  activeContext: Context | undefined
   saving: boolean
   onEdit: (noteId: string, title: string, content: string) => Promise<void>
   onDelete: (noteId: string) => Promise<void>
+  onMoveToContext: (noteId: string, contextId: string) => Promise<void>
 }
 
-export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
+export function NoteItem({ note, contexts, activeContext, saving, onEdit, onDelete, onMoveToContext }: NoteItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [editTitle, setEditTitle] = useState(note.title)
   const [editContent, setEditContent] = useState(note.content)
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false)
+  const [showContextMenu, setShowContextMenu] = useState(false)
+  const isMobile = useMobile()
+  const contextMenuRef = useRef<HTMLDivElement>(null)
 
   const isLongNote = note.content.length > NOTE_DISPLAY.LONG_NOTE_THRESHOLD
   const shouldShowExpandButton = isLongNote && !isEditing
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target as Node)) {
+        setShowContextMenu(false)
+      }
+    }
+
+    if (showContextMenu) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [showContextMenu])
 
   const handleStartEdit = () => {
     setIsEditing(true)
@@ -57,16 +99,25 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
   }
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this note?")) {
-      try {
-        await onDelete(note.id)
-      } catch (error) {
-        // Error is handled by parent component
-      }
+    try {
+      await onDelete(note.id)
+      setShowDeleteAlert(false)
+    } catch (error) {
+      // Error is handled by parent component
+    }
+  }
+
+  const handleMoveToContext = async (contextId: string) => {
+    try {
+      await onMoveToContext(note.id, contextId)
+      setShowContextMenu(false)
+    } catch (error) {
+      // Error is handled by parent component
     }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Allow Ctrl/Cmd + Enter to save
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       e.preventDefault()
       if (canSave) {
@@ -78,7 +129,7 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
     }
   }
 
-  const canSave = validateNoteTitle(editTitle) && validateNoteContent(editContent) && !saving
+  const canSave = validateNoteTitle(editTitle) && validateNoteContent(editContent) && !isEditing
   const hasChanges = editTitle.trim() !== note.title.trim() || editContent.trim() !== note.content.trim()
 
   const getDisplayContent = () => {
@@ -173,8 +224,105 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
         ) : (
           <div className="group">
             {/* Note Title - Always Visible */}
-            <div className="mb-2 sm:mb-3">
+            <div className="mb-2 sm:mb-3 flex justify-between items-start">
               <h3 className="text-base sm:text-lg font-semibold text-foreground leading-tight">{note.title}</h3>
+
+              {/* Mobile Context Menu */}
+              {isMobile && (
+                <div className="relative" ref={contextMenuRef}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 rounded-full"
+                    onClick={() => setShowContextMenu(!showContextMenu)}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+
+                  {showContextMenu && (
+                    <div className="absolute right-0 top-full mt-1 z-50 bg-popover border border-border rounded-md shadow-md py-1 w-48">
+                      <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Note Actions</div>
+                      <div className="h-px bg-border my-1" />
+                      <button
+                        className="flex w-full items-center px-3 py-2 text-sm hover:bg-accent"
+                        onClick={handleStartEdit}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Note
+                      </button>
+                      <button
+                        className="flex w-full items-center px-3 py-2 text-sm hover:bg-accent"
+                        onClick={() => setShowDeleteAlert(true)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                        Delete Note
+                      </button>
+
+                      {contexts.length > 1 && (
+                        <>
+                          <div className="h-px bg-border my-1" />
+                          <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Move to Context</div>
+                          {contexts
+                            .filter((context) => context.id !== note.context_id)
+                            .map((context) => (
+                              <button
+                                key={context.id}
+                                className="flex w-full items-center px-3 py-2 text-sm hover:bg-accent"
+                                onClick={() => handleMoveToContext(context.id)}
+                              >
+                                <FolderOpen className="mr-2 h-4 w-4" />
+                                {context.name}
+                              </button>
+                            ))}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Desktop Dropdown Menu */}
+              {!isMobile && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleStartEdit}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit Note
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setShowDeleteAlert(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Note
+                    </DropdownMenuItem>
+
+                    {contexts.length > 1 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Move to Context</div>
+                        {contexts
+                          .filter((context) => context.id !== note.context_id)
+                          .map((context) => (
+                            <DropdownMenuItem key={context.id} onClick={() => handleMoveToContext(context.id)}>
+                              <FolderOpen className="mr-2 h-4 w-4" />
+                              {context.name}
+                            </DropdownMenuItem>
+                          ))}
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
 
             {/* Note Content - Expandable */}
@@ -239,32 +387,69 @@ export function NoteItem({ note, saving, onEdit, onDelete }: NoteItemProps) {
                 </div>
               </div>
 
-              <div className="flex gap-1 sm:gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <Button
-                  onClick={handleStartEdit}
-                  disabled={saving}
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-primary h-7 sm:h-8 px-2 text-xs"
-                >
-                  <Edit className="w-3 h-3 mr-1" />
-                  <span className="hidden sm:inline">Edit</span>
-                </Button>
-                <Button
-                  onClick={handleDelete}
-                  disabled={saving}
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-destructive h-7 sm:h-8 px-2 text-xs"
-                >
-                  <Trash2 className="w-3 h-3 mr-1" />
-                  <span className="hidden sm:inline">Delete</span>
-                </Button>
-              </div>
+              {/* Desktop action buttons */}
+              {!isMobile && (
+                <div className="flex gap-1 sm:gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <Button
+                    onClick={handleStartEdit}
+                    disabled={saving}
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-primary h-7 sm:h-8 px-2 text-xs"
+                  >
+                    <Edit className="w-3 h-3 mr-1" />
+                    <span className="hidden sm:inline">Edit</span>
+                  </Button>
+                  <Button
+                    onClick={() => setShowDeleteAlert(true)}
+                    disabled={saving}
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive h-7 sm:h-8 px-2 text-xs"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </Button>
+                </div>
+              )}
+
+              {/* Mobile action buttons - fixed at bottom */}
+              {isMobile && (
+                <div className="flex gap-1">
+                  <Button
+                    onClick={handleStartEdit}
+                    disabled={saving}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 rounded-full"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Note</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this note? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="mt-0">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              {saving ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

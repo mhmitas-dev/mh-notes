@@ -20,7 +20,7 @@ interface NoteEditorProps {
 }
 
 export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorProps) {
-  const [title, setTitle] = useState("Untitled Note")
+  const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
 
   const handleSave = async () => {
@@ -49,18 +49,18 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
   const canSave = validateNoteTitle(title) && validateNoteContent(content) && !isDisabled
 
   return (
-    <div className="bg-background rounded-lg border border-border/50 shadow-sm overflow-hidden">
+    <div className="card-responsive shadow-responsive overflow-hidden">
       {/* Header */}
-      <div className="px-4 sm:px-6 py-3 sm:py-4 bg-muted/30">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/10">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 bg-muted/30 border-b border-border">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/10 flex-shrink-0">
             <PenTool className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base sm:text-lg font-semibold text-foreground truncate">
+            <h2 className="text-responsive-lg font-semibold text-foreground truncate">
               {activeContext ? `Writing in ${activeContext.name}` : "Select a context"}
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
               {activeContext ? "Create a new note" : "Choose a context to start writing"}
             </p>
           </div>
@@ -68,10 +68,10 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
       </div>
 
       {/* Content */}
-      <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
+      <div className="px-4 sm:px-6 py-4 sm:py-6 space-mobile">
         {/* Title Input */}
         <div className="space-y-2">
-          <label htmlFor="note-title" className="text-sm font-medium text-foreground">
+          <label htmlFor="note-title" className="text-responsive-sm font-medium text-foreground">
             Title
           </label>
           <Input
@@ -82,7 +82,7 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
             placeholder={activeContext ? "Enter note title..." : "Select a context to start writing"}
             disabled={isDisabled}
             className={cn(
-              "text-sm sm:text-base font-medium bg-background",
+              "input-responsive font-medium bg-background",
               "border-border/60 focus:border-primary/60 focus:ring-primary/20",
               "transition-colors duration-200",
             )}
@@ -92,7 +92,7 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
 
         {/* Content Textarea */}
         <div className="space-y-2">
-          <label htmlFor="note-content" className="text-sm font-medium text-foreground">
+          <label htmlFor="note-content" className="text-responsive-sm font-medium text-foreground">
             Content
           </label>
           <AutoResizeTextarea
@@ -109,7 +109,7 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
             maxHeight={400}
             disabled={isDisabled}
             className={cn(
-              "leading-relaxed custom-scrollbar text-sm sm:text-base",
+              "leading-relaxed custom-scrollbar text-responsive-base",
               "bg-background border-border/60 focus:border-primary/60 focus:ring-primary/20",
               "transition-colors duration-200 resize-none",
               "px-3 py-3 sm:px-4 sm:py-3",
@@ -160,7 +160,7 @@ export function NoteEditor({ activeContext, user, saving, onSave }: NoteEditorPr
             disabled={!canSave}
             size="sm"
             className={cn(
-              "h-9 px-4 text-sm font-medium min-w-[100px]",
+              "touch-target h-9 sm:h-10 px-4 text-responsive-sm font-medium min-w-[100px] sm:min-w-[120px]",
               "transition-all duration-200",
               canSave && "shadow-sm hover:shadow-md",
             )}

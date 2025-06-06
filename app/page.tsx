@@ -5,9 +5,12 @@ import { AuthForm } from "@/components/auth/auth-form"
 import { Header } from "@/components/layout/header"
 import { Sidebar } from "@/components/layout/sidebar"
 import { MobileContextSelector } from "@/components/layout/mobile-context-selector"
+import { ResponsiveWrapper } from "@/components/layout/responsive-wrapper"
 import { DebugInfo } from "@/components/layout/debug-info"
 import { NoteEditor } from "@/components/notes/note-editor"
 import { NotesList } from "@/components/notes/notes-list"
+import { ContextAddModal } from "@/components/context/context-add-modal"
+import { ContextManagementModal } from "@/components/context/context-management-modal"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { useAuth } from "@/hooks/use-auth"
 import { useNotes } from "@/hooks/use-notes"
@@ -34,7 +37,8 @@ export default function HomePage() {
   const [activeContextId, setActiveContextId] = useState<string>("")
   const [saving, setSaving] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [showNewContextInput, setShowNewContextInput] = useState(false)
+  const [showAddContextModal, setShowAddContextModal] = useState(false)
+  const [showContextManagementModal, setShowContextManagementModal] = useState(false)
   const isMobile = useMobile()
   const [authInitialized, setAuthInitialized] = useState(false)
 
@@ -56,6 +60,15 @@ export default function HomePage() {
       setActiveContextId(contexts[0].id)
     }
   }, [contexts, activeContextId])
+
+  // Close mobile menu when clicking outside or on route change
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const handleClickOutside = () => setMobileMenuOpen(false)
+      document.addEventListener("click", handleClickOutside)
+      return () => document.removeEventListener("click", handleClickOutside)
+    }
+  }, [mobileMenuOpen])
 
   const activeContext = contexts.find((c) => c.id === activeContextId)
   const contextNotes = activeContextId ? getNotesForContext(activeContextId) : []
@@ -125,6 +138,23 @@ export default function HomePage() {
     }
   }
 
+  const handleMoveNoteToContext = async (noteId: string, contextId: string) => {
+    setSaving(true)
+    try {
+      // Find the note to get its current data
+      const noteToMove = notes.find((note) => note.id === noteId)
+      if (!noteToMove || !user) return
+
+      // Create a new note in the target context
+      await addNote(contextId, noteToMove.title, noteToMove.content, user.id)
+
+      // Delete the original note
+      await deleteNote(noteId)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleRefresh = () => {
     clearError()
     if (user) {
@@ -142,10 +172,10 @@ export default function HomePage() {
   // Loading state
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen-mobile bg-background flex items-center justify-center p-4">
         <div className="flex items-center gap-3 text-primary">
           <LoadingSpinner size="lg" />
-          <span className="text-lg font-medium">Loading...</span>
+          <span className="text-responsive-lg font-medium">Loading...</span>
         </div>
       </div>
     )
@@ -165,10 +195,10 @@ export default function HomePage() {
   // Notes loading state
   if (notesLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen-mobile bg-background flex items-center justify-center p-4">
         <div className="flex items-center gap-3 text-primary">
           <LoadingSpinner size="lg" />
-          <span className="text-lg font-medium">Loading your notes...</span>
+          <span className="text-responsive-lg font-medium">Loading your notes...</span>
         </div>
       </div>
     )
@@ -176,7 +206,7 @@ export default function HomePage() {
 
   // Main application
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen-mobile bg-background">
       <Header
         user={user}
         error={error}
@@ -186,45 +216,71 @@ export default function HomePage() {
         isMobileMenuOpen={mobileMenuOpen}
       />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6 items-start">
-          {/* Desktop Sidebar */}
-          <div className="hidden lg:block lg:sticky lg:top-20">
-            <Sidebar
-              contexts={contexts}
-              activeContextId={activeContextId}
-              user={user}
-              saving={saving}
-              onContextSelect={setActiveContextId}
-              onContextAdd={handleAddContext}
-              onContextUpdate={handleUpdateContext}
-              onContextRemove={handleRemoveContext}
-            />
-          </div>
-
-          <div className="flex-1 min-w-0 *:mb-5">
-            {/* Mobile Context Selector */}
-            <div className="lg:hidden">
-              <MobileContextSelector
+      <ResponsiveWrapper padding="md">
+        <div className="py-3 sm:py-4 lg:py-6">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6 xl:gap-8 items-start">
+            {/* Desktop Sidebar */}
+            <div className="hidden lg:block sticky-desktop">
+              <Sidebar
                 contexts={contexts}
                 activeContextId={activeContextId}
+                user={user}
+                saving={saving}
                 onContextSelect={setActiveContextId}
-                onAddContext={() => setShowNewContextInput(true)}
+                onAddContextClick={() => setShowAddContextModal(true)}
+                onManageContextsClick={() => setShowContextManagementModal(true)}
               />
             </div>
 
-            <NoteEditor activeContext={activeContext} user={user} saving={saving} onSave={handleSaveNote} />
+            {/* Main Content Area */}
+            <div className="flex-1 min-w-0 space-mobile">
+              {/* Mobile Context Selector */}
+              <div className="lg:hidden">
+                <MobileContextSelector
+                  contexts={contexts}
+                  activeContextId={activeContextId}
+                  onContextSelect={setActiveContextId}
+                  onAddContextClick={() => setShowAddContextModal(true)}
+                  onManageContextsClick={() => setShowContextManagementModal(true)}
+                />
+              </div>
 
-            <NotesList
-              notes={contextNotes}
-              activeContext={activeContext}
-              saving={saving}
-              onEditNote={handleEditNote}
-              onDeleteNote={handleDeleteNote}
-            />
+              {/* Note Editor */}
+              <NoteEditor activeContext={activeContext} user={user} saving={saving} onSave={handleSaveNote} />
+
+              {/* Notes List */}
+              <NotesList
+                notes={contextNotes}
+                contexts={contexts}
+                activeContext={activeContext}
+                saving={saving}
+                onEditNote={handleEditNote}
+                onDeleteNote={handleDeleteNote}
+                onMoveNoteToContext={handleMoveNoteToContext}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </ResponsiveWrapper>
+
+      {/* Add Context Modal */}
+      <ContextAddModal
+        open={showAddContextModal}
+        onOpenChange={setShowAddContextModal}
+        user={user}
+        saving={saving}
+        onContextAdd={handleAddContext}
+      />
+
+      {/* Context Management Modal */}
+      <ContextManagementModal
+        open={showContextManagementModal}
+        onOpenChange={setShowContextManagementModal}
+        contexts={contexts}
+        saving={saving}
+        onContextUpdate={handleUpdateContext}
+        onContextRemove={handleRemoveContext}
+      />
 
       {/* Debug Info - Only in development */}
       {process.env.NODE_ENV === "development" && <DebugInfo contexts={contexts} activeContextId={activeContextId} />}

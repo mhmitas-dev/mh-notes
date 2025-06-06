@@ -9,8 +9,10 @@ import { Separator } from "@/components/ui/separator"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { ErrorMessage } from "@/components/ui/error-message"
 import { GoogleIcon } from "./google-icon"
+import { ResponsiveWrapper } from "@/components/layout/responsive-wrapper"
 import { validateEmail, validatePassword } from "@/lib/utils/validation"
 import { APP_CONFIG } from "@/lib/constants"
+import { cn } from "@/lib/utils"
 import type { AuthFormData } from "@/lib/types"
 
 interface AuthFormProps {
@@ -74,90 +76,100 @@ export function AuthForm({ onSignUp, onSignIn, onGoogleSignIn }: AuthFormProps) 
   const isFormValid = validateEmail(formData.email) && validatePassword(formData.password)
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4">
-      <Card className="w-full max-w-md shadow-lg mx-auto">
-        <CardHeader className="text-center pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-          <CardTitle className="text-2xl sm:text-3xl font-bold text-primary mb-1 sm:mb-2">{APP_CONFIG.name}</CardTitle>
-          <CardDescription className="text-sm sm:text-base">
-            {isSignUp ? "Create an account to start taking notes" : "Sign in to access your notes"}
-          </CardDescription>
-        </CardHeader>
+    <div className="min-h-screen-mobile bg-background flex items-center justify-center p-3 sm:p-4">
+      <ResponsiveWrapper maxWidth="md" padding="none">
+        <Card className="w-full shadow-responsive mx-auto">
+          <CardHeader className="text-center pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
+            <CardTitle className="text-responsive-lg sm:text-2xl lg:text-3xl font-bold text-primary mb-1 sm:mb-2">
+              {APP_CONFIG.name}
+            </CardTitle>
+            <CardDescription className="text-responsive-sm sm:text-base">
+              {isSignUp ? "Create an account to start taking notes" : "Sign in to access your notes"}
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleInputChange("email")}
-              required
-              disabled={loading}
-              className="h-10 sm:h-11 text-sm sm:text-base"
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleInputChange("password")}
-              required
-              disabled={loading}
-              minLength={6}
-              className="h-10 sm:h-11 text-sm sm:text-base"
-            />
+          <CardContent className="space-mobile px-4 sm:px-6">
+            <form onSubmit={handleSubmit} className="space-mobile">
+              <Input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleInputChange("email")}
+                required
+                disabled={loading}
+                className="input-responsive"
+                autoComplete="email"
+              />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleInputChange("password")}
+                required
+                disabled={loading}
+                minLength={6}
+                className="input-responsive"
+                autoComplete={isSignUp ? "new-password" : "current-password"}
+              />
+              <Button
+                type="submit"
+                className={cn("w-full touch-target text-responsive-sm sm:text-base", "h-10 sm:h-11 lg:h-12")}
+                disabled={!isFormValid || loading}
+              >
+                {loading ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    {isSignUp ? "Creating Account..." : "Signing In..."}
+                  </>
+                ) : (
+                  <>{isSignUp ? "Sign Up" : "Sign In"}</>
+                )}
+              </Button>
+            </form>
+
+            <div className="relative my-4 sm:my-6">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
             <Button
-              type="submit"
-              className="w-full h-10 sm:h-11 text-sm sm:text-base"
-              disabled={!isFormValid || loading}
+              onClick={handleGoogleSignIn}
+              variant="outline"
+              className={cn("w-full touch-target text-responsive-sm sm:text-base", "h-10 sm:h-11 lg:h-12")}
+              disabled={googleLoading}
             >
-              {loading ? (
-                <>
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  {isSignUp ? "Creating Account..." : "Signing In..."}
-                </>
+              {googleLoading ? (
+                <LoadingSpinner size="sm" className="mr-2" />
               ) : (
-                <>{isSignUp ? "Sign Up" : "Sign In"}</>
+                <GoogleIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               )}
+              Sign in with Google
             </Button>
-          </form>
 
-          <div className="relative my-4 sm:my-6">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <Button
-            onClick={handleGoogleSignIn}
-            variant="outline"
-            className="w-full h-10 sm:h-11 text-sm sm:text-base"
-            disabled={googleLoading}
-          >
-            {googleLoading ? (
-              <LoadingSpinner size="sm" className="mr-2" />
-            ) : (
-              <GoogleIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            {message && <p className="text-green-600 text-responsive-sm mt-3 sm:mt-4 text-center">{message}</p>}
+            {error && (
+              <div className="mt-3 sm:mt-4">
+                <ErrorMessage message={error} className="justify-center" />
+              </div>
             )}
-            Sign in with Google
-          </Button>
+          </CardContent>
 
-          {message && <p className="text-green-600 text-sm mt-3 sm:mt-4 text-center">{message}</p>}
-          {error && <ErrorMessage message={error} className="mt-3 sm:mt-4 justify-center" />}
-        </CardContent>
-
-        <CardFooter className="flex justify-center pb-4 sm:pb-6 px-4 sm:px-6">
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-primary hover:text-primary/80 text-sm underline transition-colors"
-            disabled={loading || googleLoading}
-          >
-            {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
-          </button>
-        </CardFooter>
-      </Card>
+          <CardFooter className="flex justify-center pb-4 sm:pb-6 px-4 sm:px-6">
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-primary hover:text-primary/80 text-responsive-sm underline transition-colors touch-target"
+              disabled={loading || googleLoading}
+            >
+              {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+            </button>
+          </CardFooter>
+        </Card>
+      </ResponsiveWrapper>
     </div>
   )
 }

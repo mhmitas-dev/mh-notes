@@ -8,13 +8,23 @@ import type { Note, Context } from "@/lib/types"
 
 interface NotesListProps {
   notes: Note[]
+  contexts: Context[]
   activeContext: Context | undefined
   saving: boolean
   onEditNote: (noteId: string, title: string, content: string) => Promise<void>
   onDeleteNote: (noteId: string) => Promise<void>
+  onMoveNoteToContext: (noteId: string, contextId: string) => Promise<void>
 }
 
-export function NotesList({ notes, activeContext, saving, onEditNote, onDeleteNote }: NotesListProps) {
+export function NotesList({
+  notes,
+  contexts,
+  activeContext,
+  saving,
+  onEditNote,
+  onDeleteNote,
+  onMoveNoteToContext,
+}: NotesListProps) {
   if (!activeContext) {
     return (
       <div className="bg-background rounded-lg border border-border/50 shadow-sm overflow-hidden">
@@ -71,7 +81,15 @@ export function NotesList({ notes, activeContext, saving, onEditNote, onDeleteNo
       <div className="space-y-4 sm:space-y-5">
         {notes.map((note, index) => (
           <div key={note.id} className={cn("transition-all duration-200")}>
-            <NoteItem note={note} saving={saving} onEdit={onEditNote} onDelete={onDeleteNote} />
+            <NoteItem
+              note={note}
+              contexts={contexts}
+              activeContext={activeContext}
+              saving={saving}
+              onEdit={onEditNote}
+              onDelete={onDeleteNote}
+              onMoveToContext={onMoveNoteToContext}
+            />
             {index < notes.length - 1 && (
               <div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent my-4 sm:my-5" />
             )}
