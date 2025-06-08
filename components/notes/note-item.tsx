@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatDate, isEdited } from "@/lib/utils/date"
 import { validateNoteTitle, validateNoteContent } from "@/lib/utils/validation"
-import { Edit, Trash2, Save, X, ChevronDown, ChevronUp, MoreVertical, FolderOpen } from "lucide-react"
+import { Edit, Trash2, Save, X, ChevronDown, ChevronUp, MoreVertical, FolderOpen, ExternalLink } from "lucide-react"
 import { NOTE_DISPLAY } from "@/lib/constants"
 import type { Note, Context } from "@/lib/types"
 import {
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useMobile } from "@/hooks/use-mobile"
 import MarkdownRender from "../shared/MarkdownRender"
+import Link from "next/link"
 
 interface NoteItemProps {
   note: Note
@@ -227,7 +228,6 @@ export function NoteItem({ note, contexts, activeContext, saving, onEdit, onDele
             {/* Note Title - Always Visible */}
             <div className="mb-2 sm:mb-3 flex justify-between items-start">
               <h3 className="text-base sm:text-lg font-semibold text-foreground leading-tight">{note.title}</h3>
-
               {/* Mobile Context Menu */}
               {isMobile && (
                 <div className="relative" ref={contextMenuRef}>
@@ -385,6 +385,11 @@ export function NoteItem({ note, contexts, activeContext, saving, onEdit, onDele
                   <Badge variant="outline" className="text-xs px-1.5 py-0.5 text-muted-foreground">
                     {note.content.length} chars
                   </Badge>
+                  <Button className="text-muted-foreground hover:text-primary h-7 sm:h-8 px-2 text-xs" variant={"ghost"} asChild>
+                    <Link target="_blank" href={`/note-detail/${note.id}`}>
+                      <ExternalLink className="w-4 h-4" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
 
