@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@plugin "@tailwindcss/typography";
 
 @layer base {
   :root {
@@ -94,19 +95,20 @@
 
 /* Enhanced responsive utilities */
 @layer utilities {
+
   /* Mobile-first spacing system */
-  .space-mobile > * + * {
+  .space-mobile>*+* {
     margin-top: 0.75rem;
   }
 
   @media (min-width: 640px) {
-    .space-mobile > * + * {
+    .space-mobile>*+* {
       margin-top: 1rem;
     }
   }
 
   @media (min-width: 1024px) {
-    .space-mobile > * + * {
+    .space-mobile>*+* {
       margin-top: 1.25rem;
     }
   }
@@ -270,7 +272,8 @@
   /* Mobile viewport fixes */
   .min-h-screen-mobile {
     min-height: 100vh;
-    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    min-height: 100dvh;
+    /* Dynamic viewport height for mobile */
   }
 
   /* Responsive borders */
@@ -304,6 +307,7 @@
 
 /* Component-specific responsive improvements */
 @layer components {
+
   /* Responsive card component */
   .card-responsive {
     @apply bg-background rounded-lg border border-border shadow-responsive;
@@ -359,6 +363,7 @@
 
 /* Mobile-specific optimizations */
 @media (max-width: 767px) {
+
   /* Prevent zoom on input focus */
   input[type="text"],
   input[type="email"],
@@ -398,13 +403,14 @@
   }
 
   /* Better spacing for tablet */
-  .space-tablet > * + * {
+  .space-tablet>*+* {
     margin-top: 1.25rem;
   }
 }
 
 /* Desktop-specific optimizations */
 @media (min-width: 1024px) {
+
   /* Better hover states */
   .hover-desktop:hover {
     transform: translateY(-1px);
@@ -419,7 +425,9 @@
 }
 
 /* High DPI display optimizations */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+
   /* Sharper borders on high DPI displays */
   .border {
     border-width: 0.5px;
@@ -454,6 +462,7 @@
 
 /* Reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

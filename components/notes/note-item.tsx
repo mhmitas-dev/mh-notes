@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useMobile } from "@/hooks/use-mobile"
+import MarkdownRender from "../shared/MarkdownRender"
 
 interface NoteItemProps {
   note: Note
@@ -329,14 +330,14 @@ export function NoteItem({ note, contexts, activeContext, saving, onEdit, onDele
             <div className="relative">
               <div
                 className={cn(
-                  "whitespace-pre-wrap text-foreground text-sm leading-relaxed transition-all duration-300",
+                  "whitespace-pre-wrap text-foreground text-sm leading-relaxed transition-all duration-300 prose",
                   !isExpanded && isLongNote && "overflow-hidden",
                 )}
                 style={{
                   maxHeight: !isExpanded && isLongNote ? `${NOTE_DISPLAY.COLLAPSED_HEIGHT}px` : "none",
                 }}
               >
-                {getDisplayContent()}
+                <MarkdownRender markdown={getDisplayContent()} />
               </div>
 
               {/* Fade overlay for collapsed long notes */}
